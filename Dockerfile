@@ -27,7 +27,7 @@ RUN python3 -m pip install --upgrade pip \
     && python3 -m pip install torch-geometric \
     && python3 -m pip install torch-cluster -f https://data.pyg.org/whl/torch-1.12.1+cu116.html \
     && python3 -m pip install torch-spline-conv -f https://data.pyg.org/whl/torch-1.12.1+cu116.html \
-    && python3 -m pip install pyyaml scipy networkx biopython rdkit-pypi e3nn spyrmsd pandas biopandas \
+    && python3 -m pip install pyyaml scipy networkx biopython rdkit-pypi e3nn spyrmsd pandas biopandas
 
 RUN git clone https://github.com/facebookresearch/esm && \
     cd ${DIFFDOCK_HOME}/esm && \
