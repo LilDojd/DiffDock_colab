@@ -1,1 +1,1 @@
-# DiffDock_colab
+# DiffDock_colab docker image
