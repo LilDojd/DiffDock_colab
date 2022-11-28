@@ -3,6 +3,7 @@ import os
 import copy
 import os
 import torch
+import argparse
 
 import time
 from argparse import ArgumentParser, Namespace, FileType
@@ -86,6 +87,27 @@ def esm(protein_path, out_file):
         env=os.environ,
     )
 
-if __name__=='__main__':
-    df = pd.read_csv('protein_ligand.csv')
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--protein_ligand_csv', type=str, required=True, help='path to protein ligand csv')
+    parser.add_argument('--out_dir', type=str, required=True, help='path to output directory')
+    parser.add_argument('--inference_steps', type=int, default=20, help='number of inference steps')
+    parser.add_argument('--samples_per_complex', type=int, default=40, help='number of samples per complex')
+    parser.add_argument('--batch_size', type=int, default=10, help='batch size')
+    parser.add_argument('--actual_steps', type=int, default=18, help='number of actual steps')
+    parser.add_argument('--no_final_step_noise', action='store_true', help='no final step noise')
+
+    args = parser.parse_args()
+
+    df = pd.read_csv('protein_ligand.csv')
+    # For each unique protein construct esm embedding
+    for protein in df['protein'].unique():
+        print(f"Extracting ESM embeddings for {protein}")
+        esm(protein, f'data/esm2_output/{protein}.pt')
+
+    subprocess.call(f"python -m inference --protein_ligand_csv {args.protein_ligand_csv} "
+                    f"--out_dir {args.out_dir} --inference_steps {args.inference_steps} "
+                    f"--samples_per_complex {args.samples_per_complex} --batch_size {args.batch_size} "
+                    f"--actual_steps {args.actual_steps} --no_final_step_noise {args.no_final_step_noise}",
+                    shell=True)
