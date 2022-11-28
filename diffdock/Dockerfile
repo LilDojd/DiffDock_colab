@@ -1,6 +1,18 @@
 FROM continuumio/miniconda3
 
 
+# https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE
+# Prevents Python from writing .pyc files to disk
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# ensures that the python output is sent straight to terminal (e.g. your container log)
+# without being first buffered and that you can see the output of your application (e.g. django logs)
+# in real time. Equivalent to python -u: https://docs.python.org/3/using/cmdline.html#cmdoption-u
+ENV PYTHONUNBUFFERED 1
+ENV ENVIRONMENT prod
+ENV TESTING 0
+
+
 RUN touch /etc/localtime
 
 RUN apt-get update --fix-missing && DEBIAN_FRONTEND=noninteractive apt upgrade -y && \
@@ -26,17 +38,18 @@ ENV LC_ALL en_US.UTF-8
 #    && conda clean -tipy
 RUN conda update -c conda-forge --yes --all
 
-WORKDIR /apps
+COPY DiffDock /apps/DiffDock
 
 ENV DIFFDOCK_HOME "/apps/DiffDock"
-RUN git clone https://github.com/gcorso/DiffDock.git
+ENV PATH "$DIFFDOCK_HOME:$PATH"
+ENV PYTHONPATH "$DIFFDOCK_HOME:$PYTHONPATH"
 
 
 WORKDIR ${DIFFDOCK_HOME}
 RUN conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c nvidia -c pytorch -y
 RUN conda install pyg -c pyg && \
     conda install rdkit scipy pyyaml networkx biopython biopandas spyrmsd -c conda-forge -y && \
-    pip install e3nn
+    pip install e3nn gradio
 
 SHELL ["/bin/bash", "-c"]
 RUN git clone https://github.com/facebookresearch/esm && cd esm && pip install -e .
@@ -48,6 +61,3 @@ RUN mkdir -p ${DIFFDOCK_HOME}/esm/model_weights/.cache/torch/hub/checkpoints && 
 
 
 WORKDIR "/tmp"
-
-CMD [ "/bin/bash" ]
-
