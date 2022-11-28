@@ -38,11 +38,14 @@ ENV LC_ALL en_US.UTF-8
 #    && conda clean -tipy
 RUN conda update -c conda-forge --yes --all
 
-COPY DiffDock /apps/DiffDock
+WORKDIR '/apps'
+RUN git clone https://github.com/gcorso/DiffDock.git
 
 ENV DIFFDOCK_HOME "/apps/DiffDock"
 ENV PATH "$DIFFDOCK_HOME:$PATH"
 ENV PYTHONPATH "$DIFFDOCK_HOME:$PYTHONPATH"
+COPY 'app.py' "$DIFFDOCK_HOME/app.py"
+
 
 
 WORKDIR ${DIFFDOCK_HOME}

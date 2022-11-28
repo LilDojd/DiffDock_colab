@@ -3,7 +3,7 @@
 version: '3'
 services:
   app:
-    build: diffdock
+    build: .
     ports:
       - "5000:5000"
     command: python app.py
